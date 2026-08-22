@@ -9,10 +9,13 @@ from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN, SERVICE_EXPLAIN
 from .engine import WhyEngine
 from .logbook_provider import HomeAssistantLogbookProvider
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 SERVICE_SCHEMA = vol.Schema(
     {
@@ -22,7 +25,7 @@ SERVICE_SCHEMA = vol.Schema(
 )
 
 
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register the response-only service."""
     engine = WhyEngine(HomeAssistantLogbookProvider(hass))
 
