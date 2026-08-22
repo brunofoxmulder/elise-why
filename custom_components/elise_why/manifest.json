@@ -1,0 +1,13 @@
+{
+  "domain": "elise_why",
+  "name": "Élise Why",
+  "version": "0.1.0",
+  "documentation": "https://github.com/brunofoxmulder/elise-why",
+  "issue_tracker": "https://github.com/brunofoxmulder/elise-why/issues",
+  "codeowners": ["@brunofoxmulder"],
+  "config_flow": true,
+  "single_config_entry": true,
+  "dependencies": ["logbook", "recorder"],
+  "integration_type": "service",
+  "iot_class": "calculated"
+}

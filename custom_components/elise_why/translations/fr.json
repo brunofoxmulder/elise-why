@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Élise Why",
+        "description": "Installe le moteur local d'explication causale en lecture seule."
+      }
+    },
+    "abort": {
+      "already_configured": "Élise Why est déjà configurée."
+    }
+  }
+}
