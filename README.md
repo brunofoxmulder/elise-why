@@ -2,6 +2,8 @@
 
 Intégration Home Assistant **strictement en lecture seule** destinée à expliquer la dernière action causale observée sur une entité.
 
+**Version actuelle : 0.1.0**
+
 ## Objectif V0.1
 
 `entity_id -> dernier événement causal réel -> contexte Home Assistant -> explication courte`
