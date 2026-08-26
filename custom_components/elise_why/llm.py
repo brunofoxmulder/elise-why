@@ -14,7 +14,7 @@ from homeassistant.helpers.llm import LLM_API_ASSIST, LLMContext, Tool, ToolInpu
 from homeassistant.util.json import JsonObjectType
 
 from .client import InvestigatorClient, InvestigatorClientError
-from .const import DATA_CLIENT, DOMAIN
+from .const import DATA_CLIENT, DOMAIN, MAX_LLM_TARGETS
 
 PROMPT = """Élise Why provides deterministic causal evidence from Élise Investigator.
 Use InvestigateWhy for questions asking why a Home Assistant object is in a state or changed state.
@@ -22,6 +22,7 @@ Never strengthen Investigator certainty: confirmed, probable and indeterminate a
 Do not invent a cause from an automation name, current state, timing coincidence, or general knowledge.
 For an explicit plural request, set all_matches=true and investigate each matching entity; otherwise require one unambiguous target.
 If several results have different causes or certainty levels, report them separately.
+When the user asks why an object is currently in a stated state/value, use GetLiveContext first to verify that current state, then pass the verified observed_value (and attribute when relevant) to InvestigateWhy.
 Use event_time only to phrase timing; calculating a relative duration must never change the causal verdict.
 If Investigator is unavailable or indeterminate, say so plainly instead of supplying a plausible explanation."""
 
@@ -49,7 +50,6 @@ class InvestigateWhyTool(Tool):
             vol.Optional("observed_time", description="Observed ISO-8601 date/time when the user specifies one."): cv.string,
             vol.Optional("observed_value", description="Observed state or attribute value when explicitly relevant."): vol.Any(str, int, float, bool),
             vol.Optional("attribute", description="Attribute name when observed_value refers to an attribute."): cv.string,
-            vol.Optional("user_declaration", description="Optional user-declared observation; never treat it as proof."): cv.string,
             vol.Optional("window_minutes", description="Investigator lookback window, from 5 to 180 minutes."): vol.All(
                 vol.Coerce(int), vol.Range(min=5, max=180)
             ),
@@ -81,7 +81,6 @@ class InvestigateWhyTool(Tool):
                     observed_time=args.get("observed_time"),
                     observed_value=args.get("observed_value"),
                     attribute=args.get("attribute"),
-                    user_declaration=args.get("user_declaration"),
                     window_minutes=args.get("window_minutes"),
                 )
             except InvestigatorClientError as err:
@@ -143,8 +142,13 @@ def _resolve_targets(
 
     entity_ids = sorted({state.entity_id for state in match_result.states})
     if not args["all_matches"] and len(entity_ids) != 1:
-        candidates = ", ".join(entity_ids[:8])
+        candidates = ", ".join(entity_ids[:MAX_LLM_TARGETS])
         return f"Target is ambiguous; matching entities: {candidates}"
+
+    if len(entity_ids) > MAX_LLM_TARGETS:
+        return (
+            f"Too many matching entities ({len(entity_ids)}); narrow the target by name or area"
+        )
 
     return entity_ids
 

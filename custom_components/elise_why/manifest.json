@@ -3,7 +3,7 @@
   "name": "Élise Why",
   "codeowners": ["@brunofoxmulder"],
   "config_flow": true,
-  "after_dependencies": ["hassio"],
+  "after_dependencies": ["hassio", "logbook", "recorder"],
   "documentation": "https://github.com/brunofoxmulder/elise-why",
   "integration_type": "service",
   "iot_class": "local_polling",
