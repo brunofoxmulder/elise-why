@@ -9,6 +9,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.components.hassio import HassioNotReadyError, get_apps_list
+from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     TextSelector,
     TextSelectorConfig,
@@ -23,8 +24,17 @@ from .client import (
 from .const import (
     CONF_INVESTIGATOR_SLUG,
     CONF_INVESTIGATOR_TOKEN,
+    CONF_RESPONSE_STYLE,
+    CONF_STYLE_PROMPT,
     DOMAIN,
     INVESTIGATOR_SLUG_SUFFIX,
+)
+from .presentation import (
+    DEFAULT_RESPONSE_STYLE,
+    MAX_CUSTOM_STYLE_PROMPT_LENGTH,
+    RESPONSE_STYLES,
+    normalize_custom_style_prompt,
+    normalize_response_style,
 )
 from .transport import find_investigator_slug
 
@@ -45,7 +55,17 @@ class EliseWhyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    async def _validate_token(self, token: str) -> tuple[dict[str, str], dict[str, str] | None]:
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> EliseWhyOptionsFlow:
+        """Create the presentation options flow."""
+        return EliseWhyOptionsFlow()
+
+    async def _validate_token(
+        self, token: str
+    ) -> tuple[dict[str, str], dict[str, str] | None]:
         """Find Investigator and validate one token."""
         errors: dict[str, str] = {}
         try:
@@ -123,5 +143,52 @@ class EliseWhyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="reauth_confirm",
             data_schema=STEP_USER_DATA_SCHEMA,
+            errors=errors,
+        )
+
+
+class EliseWhyOptionsFlow(config_entries.OptionsFlow):
+    """Manage response presentation without changing causal behavior."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Configure response detail and an optional style-only prompt."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            raw_custom = str(user_input.get(CONF_STYLE_PROMPT) or "").strip()
+            if len(raw_custom) > MAX_CUSTOM_STYLE_PROMPT_LENGTH:
+                errors["base"] = "style_prompt_too_long"
+            else:
+                return self.async_create_entry(
+                    data={
+                        CONF_RESPONSE_STYLE: normalize_response_style(
+                            user_input.get(CONF_RESPONSE_STYLE)
+                        ),
+                        CONF_STYLE_PROMPT: normalize_custom_style_prompt(raw_custom),
+                    }
+                )
+
+        current = self.config_entry.options
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_RESPONSE_STYLE,
+                    default=current.get(
+                        CONF_RESPONSE_STYLE, DEFAULT_RESPONSE_STYLE
+                    ),
+                ): vol.In(RESPONSE_STYLES),
+                vol.Optional(
+                    CONF_STYLE_PROMPT,
+                    default=current.get(CONF_STYLE_PROMPT, ""),
+                ): TextSelector(
+                    TextSelectorConfig(type=TextSelectorType.TEXT)
+                ),
+            }
+        )
+        return self.async_show_form(
+            step_id="init",
+            data_schema=schema,
             errors=errors,
         )

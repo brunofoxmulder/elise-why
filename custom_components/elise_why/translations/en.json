@@ -10,7 +10,7 @@
       },
       "reauth_confirm": {
         "title": "Reconnect Élise Why",
-        "description": "Enter the current Élise Investigator API token to enable the dev.17 facade.",
+        "description": "Enter the current Élise Investigator API token to enable the dev.18 facade.",
         "data": {
           "investigator_token": "Investigator API token"
         }
@@ -25,6 +25,21 @@
     "abort": {
       "already_configured": "Élise Why is already configured.",
       "reauth_successful": "Élise Why is reconnected to Investigator."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Élise Why responses",
+        "description": "Choose the response detail level. The optional prompt may affect style only; it cannot change Investigator evidence or certainty.",
+        "data": {
+          "response_style": "Response level",
+          "style_prompt": "Additional prompt (style only)"
+        }
+      }
+    },
+    "error": {
+      "style_prompt_too_long": "The additional prompt must be at most 500 characters."
     }
   }
 }
