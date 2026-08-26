@@ -10,7 +10,7 @@
       },
       "reauth_confirm": {
         "title": "Reconnecter Élise Why",
-        "description": "Saisis le jeton API actuel d'Élise Investigator pour activer la façade dev.17.",
+        "description": "Saisis le jeton API actuel d'Élise Investigator pour activer la façade dev.18.",
         "data": {
           "investigator_token": "Jeton API Investigator"
         }
@@ -25,6 +25,21 @@
     "abort": {
       "already_configured": "Élise Why est déjà configurée.",
       "reauth_successful": "Élise Why est reconnectée à Investigator."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Réponses Élise Why",
+        "description": "Choisis le niveau de restitution. Le prompt complémentaire agit uniquement sur le style : il ne peut pas modifier les preuves ni le niveau de certitude fourni par Investigator.",
+        "data": {
+          "response_style": "Niveau de réponse",
+          "style_prompt": "Prompt complémentaire (style uniquement)"
+        }
+      }
+    },
+    "error": {
+      "style_prompt_too_long": "Le prompt complémentaire doit contenir au maximum 500 caractères."
     }
   }
 }

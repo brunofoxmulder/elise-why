@@ -14,17 +14,14 @@ from homeassistant.helpers.llm import LLM_API_ASSIST, LLMContext, Tool, ToolInpu
 from homeassistant.util.json import JsonObjectType
 
 from .client import InvestigatorClient, InvestigatorClientError
-from .const import DATA_CLIENT, DOMAIN, MAX_LLM_TARGETS
-
-PROMPT = """Élise Why provides deterministic causal evidence from Élise Investigator.
-Use InvestigateWhy for questions asking why a Home Assistant object is in a state or changed state.
-Never strengthen Investigator certainty: confirmed, probable and indeterminate are immutable.
-Do not invent a cause from an automation name, current state, timing coincidence, or general knowledge.
-For an explicit plural request, set all_matches=true and investigate each matching entity; otherwise require one unambiguous target.
-If several results have different causes or certainty levels, report them separately.
-When the user asks why an object is currently in a stated state/value, use GetLiveContext first to verify that current state, then pass the verified observed_value (and attribute when relevant) to InvestigateWhy.
-Use event_time only to phrase timing; calculating a relative duration must never change the causal verdict.
-If Investigator is unavailable or indeterminate, say so plainly instead of supplying a plausible explanation."""
+from .const import (
+    CONF_RESPONSE_STYLE,
+    CONF_STYLE_PROMPT,
+    DATA_CLIENT,
+    DOMAIN,
+    MAX_LLM_TARGETS,
+)
+from .presentation import DEFAULT_RESPONSE_STYLE, build_prompt
 
 
 class InvestigateWhyTool(Tool):
@@ -33,8 +30,9 @@ class InvestigateWhyTool(Tool):
     name = "InvestigateWhy"
     description = (
         "Get read-only causal evidence from Élise Investigator for one or more "
-        "Home Assistant entities. Use entity_id when known; otherwise resolve by "
-        "name/domain/area. Set all_matches only for an explicit plural request."
+        "Home Assistant entities. Use this only for causal 'why' questions, never "
+        "for commands or device control. Use entity_id when known; otherwise "
+        "resolve by name/domain/area. Set all_matches=true for explicit plural requests."
     )
     parameters = vol.Schema(
         {
@@ -45,7 +43,10 @@ class InvestigateWhyTool(Tool):
             vol.Optional(
                 "all_matches",
                 default=False,
-                description="True only when the user explicitly asks about several/all matching entities.",
+                description=(
+                    "True when the user explicitly asks about several/all matching "
+                    "entities, including natural plural wording."
+                ),
             ): cv.boolean,
             vol.Optional("observed_time", description="Observed ISO-8601 date/time when the user specifies one."): cv.string,
             vol.Optional("observed_value", description="Observed state or attribute value when explicitly relevant."): vol.Any(str, int, float, bool),
@@ -101,6 +102,16 @@ def _get_client(hass: HomeAssistant) -> InvestigatorClient | None:
         return None
     client = data.get(DATA_CLIENT)
     return client if isinstance(client, InvestigatorClient) else None
+
+
+def _get_prompt(hass: HomeAssistant) -> str:
+    """Build the presentation prompt from current config-entry options."""
+    entries = hass.config_entries.async_entries(DOMAIN)
+    options = entries[0].options if entries else {}
+    return build_prompt(
+        options.get(CONF_RESPONSE_STYLE, DEFAULT_RESPONSE_STYLE),
+        options.get(CONF_STYLE_PROMPT, ""),
+    )
 
 
 def _resolve_targets(
@@ -160,4 +171,4 @@ def async_get_tools(
     """Expose one causal tool to the built-in Assist LLM API."""
     if api_id != LLM_API_ASSIST or _get_client(hass) is None:
         return None
-    return LLMTools(tools=[InvestigateWhyTool()], prompt=PROMPT)
+    return LLMTools(tools=[InvestigateWhyTool()], prompt=_get_prompt(hass))
