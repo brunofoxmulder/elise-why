@@ -3,11 +3,28 @@
     "step": {
       "user": {
         "title": "Élise Why",
-        "description": "Installe le moteur local d'explication causale en lecture seule."
+        "description": "Relie Élise Why à l'app locale Élise Investigator. Le jeton reste stocké dans Home Assistant et n'est jamais transmis au modèle IA.",
+        "data": {
+          "investigator_token": "Jeton API Investigator"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reconnecter Élise Why",
+        "description": "Saisis le jeton API actuel d'Élise Investigator pour activer la façade dev.17.",
+        "data": {
+          "investigator_token": "Jeton API Investigator"
+        }
       }
     },
+    "error": {
+      "cannot_connect": "Impossible de joindre Élise Investigator sur le réseau interne Home Assistant.",
+      "invalid_auth": "Le jeton API Investigator est invalide.",
+      "investigator_not_found": "L'app Élise Investigator 0.2 Test n'a pas été trouvée.",
+      "supervisor_not_ready": "Le Supervisor Home Assistant n'est pas prêt."
+    },
     "abort": {
-      "already_configured": "Élise Why est déjà configurée."
+      "already_configured": "Élise Why est déjà configurée.",
+      "reauth_successful": "Élise Why est reconnectée à Investigator."
     }
   }
 }
