@@ -13,8 +13,8 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import (
     CONFIG_TEST_TIMEOUT_SECONDS,
     INVESTIGATOR_ENTITIES_PATH,
-    INVESTIGATOR_INVESTIGATE_PATH,
     INVESTIGATOR_PORT,
+    INVESTIGATOR_WHY_PATH,
     REQUEST_TIMEOUT_SECONDS,
 )
 from .transport import investigator_url, validate_investigation_result
@@ -89,7 +89,7 @@ class InvestigatorClient:
         user_declaration: str | None = None,
         window_minutes: int | None = None,
     ) -> dict[str, Any]:
-        """Run one structured read-only investigation and return its proof JSON."""
+        """Ask Investigator's journal-first causal endpoint and return its compact result."""
         data: dict[str, Any] = {"entity_id": entity_id}
         if observed_time is not None:
             data["observed_time"] = observed_time
@@ -104,7 +104,7 @@ class InvestigatorClient:
 
         try:
             async with self._session.post(
-                self._url(INVESTIGATOR_INVESTIGATE_PATH),
+                self._url(INVESTIGATOR_WHY_PATH),
                 headers={"Authorization": f"Bearer {self._token}"},
                 json=data,
                 timeout=ClientTimeout(total=REQUEST_TIMEOUT_SECONDS),
