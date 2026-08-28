@@ -2,13 +2,15 @@
 
 Intégration Home Assistant **strictement en lecture seule** qui relie un agent conversationnel à **Élise Investigator**, moteur causal local et déterministe.
 
-**Candidate : 0.2.0-dev.18**
+**Candidate : 0.2.0-dev.19**
 
 ## Rôle
 
 Élise Why ne détermine pas elle-même les causes.
 
-`question naturelle → LLM Home Assistant → InvestigateWhy → Élise Investigator → preuve JSON → restitution Élise Why`
+`question naturelle → LLM Home Assistant → InvestigateWhy → Élise Investigator /api/v1/why → journal causal → preuve compacte → restitution Élise Why`
+
+Depuis dev.19, l’outil `InvestigateWhy` n’appelle plus directement la recherche approfondie `/api/v1/investigate`. Il appelle l’endpoint structuré `/api/v1/why` d’Investigator dev.30 : le journal causal est consulté d’abord et l’enquête approfondie n’est utilisée qu’en secours si le réglage Investigator l’autorise.
 
 L'outil `InvestigateWhy` peut résoudre une entité exposée par `entity_id`, nom, domaine ou zone. Une demande explicitement plurielle doit investiguer plusieurs cibles sans demander une clarification inutile.
 
@@ -35,6 +37,8 @@ Les verdicts Investigator sont immuables :
 
 Élise Why transmet les résultats sans augmenter leur certitude. Une réponse invalide, une cible ambiguë ou un Investigator indisponible produit une erreur explicite plutôt qu'une cause inventée.
 
+Le résultat transmis au LLM est volontairement compact : la cause fonctionnelle ou la source directe prouvée est privilégiée. Les noms d’automatisations, traces et variables techniques restent dans Investigator.
+
 ## Sécurité
 
 Élise Why :
@@ -60,9 +64,9 @@ Aucune suppression/réinstallation de l'intégration n'est nécessaire.
 
 ## Compatibilité
 
-La candidate est conçue pour Home Assistant 2026.8.2. Le raccordement LLM repose sur le mécanisme natif `llm.py` / `async_get_tools()` de l'API Assist : les outils fournis par les intégrations sont assemblés avec les outils Assist standards.
+La candidate dev.19 est conçue pour fonctionner avec Élise Investigator **0.2.0-dev.30** et Home Assistant 2026.8.x. Le raccordement LLM repose sur le mécanisme natif `llm.py` / `async_get_tools()` de l'API Assist : les outils fournis par les intégrations sont assemblés avec les outils Assist standards.
 
-L'action `elise_why.explain` est conservée temporairement pour compatibilité, mais elle est désormais un proxy vers `POST /api/v1/investigate`.
+L'action `elise_why.explain` est conservée temporairement pour compatibilité et utilise le même client local journal-first que `InvestigateWhy`.
 
 Les anciens `engine.py` et `logbook_provider.py` sont conservés temporairement comme archive de transition et ne participent plus au runtime.
 
