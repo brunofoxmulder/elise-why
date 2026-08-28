@@ -1,0 +1,33 @@
+name: Publish dev.19 prerelease
+
+on:
+  push:
+    branches:
+      - dev19-causal-route
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Publish dev.19 prerelease if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="0.2.0-dev.19"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+            exit 0
+          fi
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Élise Why 0.2.0-dev.19" \
+            --prerelease \
+            --notes "Candidate terrain pour Investigator 0.2.0-dev.30. InvestigateWhy utilise désormais POST /api/v1/why afin de consulter le journal causal en priorité. Les verdicts Investigator restent inchangés et aucun service Home Assistant mutateur n'est ajouté."
