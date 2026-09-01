@@ -19,7 +19,7 @@ jobs:
           python-version: "3.13"
       - run: python -m pip install pytest
       - run: python -m compileall -q custom_components tests
-      - run: python -m pytest -q tests/test_engine.py tests/test_dev17_transport.py tests/test_dev18_presentation.py tests/test_dev20_current_state_last_cause.py
+      - run: python -m pytest -q tests
 
   validate-hacs:
     runs-on: ubuntu-latest
