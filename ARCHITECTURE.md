@@ -1,32 +1,51 @@
-# Architecture — Élise Why V0.1
+# Architecture — Élise Why dev.17
 
 ## Décision
 
-Élise Why est **indépendante de HA-MCP**.
+Élise Why n'est plus un second moteur causal. Elle devient une façade Home Assistant LLM, strictement en lecture seule, vers Élise Investigator.
 
-Aucun fichier n'est placé dans le paquet HA-MCP et aucun patch HA-MCP n'est appliqué.
-Le patch historique `ha_mcp_why_v0_1.patch` reste uniquement une archive de conception.
+Le moteur déterministe et les verdicts `confirmed` / `probable` / `indeterminate` restent la responsabilité exclusive d'Élise Investigator.
 
-## Chaîne V0.1
+## Chaîne dev.17
 
-Home Assistant
-→ Logbook / Recorder (lecture)
-→ `HomeAssistantLogbookProvider`
-→ `WhyEngine`
-→ action `elise_why.explain` (`SupportsResponse.ONLY`)
-→ résultat JSON
+Utilisateur
+→ agent conversationnel Home Assistant / LLM
+→ outil `InvestigateWhy`
+→ Élise Why
+→ API locale `POST /api/v1/investigate`
+→ Élise Investigator
+→ JSON de preuve inchangé
+→ formulation naturelle par l'IA
+
+## Résolution des objets
+
+L'outil accepte soit un `entity_id` exact, soit des critères Home Assistant (`name`, `domain`, `area`).
+
+La résolution est faite avec le moteur de ciblage Home Assistant et uniquement parmi les entités exposées à l'assistant.
+
+Une cible ambiguë est refusée. `all_matches=true` n'est autorisé que lorsque la demande est explicitement plurielle, par exemple « les volets ».
+
+## Réseau et authentification
+
+- Le slug réel de l'App Investigator est obtenu via `get_apps_list()`.
+- Pour compatibilité avec Home Assistant 2026.8.2, l'hostname interne est dérivé par remplacement `_` → `-`, comme dans Maison Élise Bridge.
+- Le port 8099 reste interne au réseau Supervisor et n'est pas exposé au LAN.
+- Les appels directs utilisent le Bearer token Investigator stocké dans la config entry Home Assistant.
+- Le token n'est jamais placé dans le prompt LLM ni retourné par l'outil.
 
 ## Invariants
 
-1. Aucun service de commande n'est appelé.
-2. Aucun état HA n'est modifié.
-3. Aucun fichier YAML n'est lu/écrit.
-4. Aucun secret n'est requis.
-5. Une cause est `confirmed` uniquement lorsque la trace l'établit.
-6. Une trace incomplète donne `probable` ou `indeterminate`.
-7. Une mise à jour HA-MCP ne touche pas cette intégration.
+1. Aucun service de commande n'est appelé par Élise Why.
+2. Aucun état Home Assistant n'est modifié.
+3. Élise Why ne lit plus Logbook/Recorder pour déterminer une cause.
+4. L'IA ne peut jamais augmenter un niveau de certitude Investigator.
+5. Un statut inconnu ou une réponse associée à une autre `entity_id` est rejeté.
+6. Une indisponibilité Investigator reste une indisponibilité, jamais une cause plausible.
+7. Plusieurs résultats sont conservés séparément avant synthèse par l'IA.
+8. Maison Élise Bridge / Alexa est hors périmètre dev.17 et n'est pas modifié.
 
-## Étape ultérieure — hors V0.1
+## Compatibilité V0.1
 
-Un accès ChatGPT direct demandera une interface/bridge séparée.
-Elle devra appeler Élise Why sans donner de droits de commande sur Home Assistant.
+L'action réponse seule `elise_why.explain` est conservée pendant la transition mais elle appelle désormais Investigator.
+
+Les anciens fichiers `engine.py` et `logbook_provider.py` restent temporairement dans le dépôt pour faciliter comparaison et rollback, mais ils ne sont plus importés par le runtime dev.17.

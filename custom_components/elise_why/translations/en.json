@@ -3,11 +3,43 @@
     "step": {
       "user": {
         "title": "Élise Why",
-        "description": "Install the local read-only causal explanation engine."
+        "description": "Connect Élise Why to the local Élise Investigator app. The token stays in Home Assistant and is never sent to the AI model.",
+        "data": {
+          "investigator_token": "Investigator API token"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reconnect Élise Why",
+        "description": "Enter the current Élise Investigator API token to enable the dev.18 facade.",
+        "data": {
+          "investigator_token": "Investigator API token"
+        }
       }
     },
+    "error": {
+      "cannot_connect": "Unable to reach Élise Investigator on the Home Assistant internal network.",
+      "invalid_auth": "The Investigator API token is invalid.",
+      "investigator_not_found": "The Élise Investigator 0.2 Test app was not found.",
+      "supervisor_not_ready": "Home Assistant Supervisor is not ready."
+    },
     "abort": {
-      "already_configured": "Élise Why is already configured."
+      "already_configured": "Élise Why is already configured.",
+      "reauth_successful": "Élise Why is reconnected to Investigator."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Élise Why responses",
+        "description": "Choose the response detail level. The optional prompt may affect style only; it cannot change Investigator evidence or certainty.",
+        "data": {
+          "response_style": "Response level",
+          "style_prompt": "Additional prompt (style only)"
+        }
+      }
+    },
+    "error": {
+      "style_prompt_too_long": "The additional prompt must be at most 500 characters."
     }
   }
 }

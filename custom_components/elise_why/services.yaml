@@ -1,18 +1,18 @@
 explain:
   name: Explain latest entity action
-  description: Read-only causal explanation of the latest observed action for an entity.
+  description: Read-only compatibility action proxied to the local Élise Investigator engine.
   fields:
     entity_id:
       name: Entity
-      description: Home Assistant entity_id to explain.
+      description: Home Assistant entity_id to investigate.
       required: true
       example: cover.volet_salon_2
       selector:
         entity: {}
     at_time:
       name: Observation time
-      description: Optional ISO-8601 time; defaults to now.
+      description: Optional ISO-8601 observation time; omitted means the latest relevant event.
       required: false
-      example: "2026-08-22T14:00:00+00:00"
+      example: "2026-08-26T19:00:00+02:00"
       selector:
         text: {}

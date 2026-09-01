@@ -1,3 +1,19 @@
 DOMAIN = "elise_why"
 SERVICE_EXPLAIN = "explain"
-VERSION = "0.1.0"
+VERSION = "0.2.0-dev.20"
+
+DATA_CLIENT = "investigator_client"
+
+CONF_INVESTIGATOR_SLUG = "investigator_slug"
+CONF_INVESTIGATOR_TOKEN = "investigator_token"
+CONF_RESPONSE_STYLE = "response_style"
+CONF_STYLE_PROMPT = "style_prompt"
+
+INVESTIGATOR_PORT = 8099
+INVESTIGATOR_SLUG_SUFFIX = "elise_investigator_02_test"
+INVESTIGATOR_ENTITIES_PATH = "/api/v1/entities"
+INVESTIGATOR_INVESTIGATE_PATH = "/api/v1/investigate"
+
+CONFIG_TEST_TIMEOUT_SECONDS = 4
+REQUEST_TIMEOUT_SECONDS = 30
+MAX_LLM_TARGETS = 8
