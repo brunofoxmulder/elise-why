@@ -1,6 +1,6 @@
 DOMAIN = "elise_why"
 SERVICE_EXPLAIN = "explain"
-VERSION = "0.2.0-dev.18"
+VERSION = "0.2.0-dev.20"
 
 DATA_CLIENT = "investigator_client"
 

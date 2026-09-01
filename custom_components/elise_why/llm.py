@@ -48,7 +48,14 @@ class InvestigateWhyTool(Tool):
                     "entities, including natural plural wording."
                 ),
             ): cv.boolean,
-            vol.Optional("observed_time", description="Observed ISO-8601 date/time when the user specifies one."): cv.string,
+            vol.Optional(
+                "observed_time",
+                description=(
+                    "Observed ISO-8601 date/time only when the user explicitly supplied "
+                    "that date/time. Never derive it from live context, last_changed, "
+                    "last_updated or current time for a simple current-state question."
+                ),
+            ): cv.string,
             vol.Optional("observed_value", description="Observed state or attribute value when explicitly relevant."): vol.Any(str, int, float, bool),
             vol.Optional("attribute", description="Attribute name when observed_value refers to an attribute."): cv.string,
             vol.Optional("window_minutes", description="Investigator lookback window, from 5 to 180 minutes."): vol.All(
